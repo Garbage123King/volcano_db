@@ -1,0 +1,13 @@
+[package]
+name = "volcano_db"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+pg_query = { version = "6", optional = true } # We will use sqlparser as primary due to libclang Windows dependency
+sqlparser = "0.53"
+
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+comfy-table = "7.1"
+anyhow = "1.0"
