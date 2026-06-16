@@ -43,8 +43,12 @@ pub struct Catalog {
     pub tables: HashMap<String, Schema>,
 }
 
+/*
+目录;一览表;系列;种类;产品样本;
+*/
+
 impl Catalog {
-    pub fn new() -> Self {
+    pub fn newaaa() -> Self {
         Self {
             tables: HashMap::new(),
         }

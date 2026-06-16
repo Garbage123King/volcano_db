@@ -27,7 +27,7 @@ fn print_banner() {
 fn main() -> Result<()> {
     print_banner();
 
-    let mut catalog = Catalog::new();
+    let mut catalog = Catalog::newaaa();
     let mut tables: HashMap<String, Vec<Tuple>> = HashMap::new();
 
     // Add some default tables and mock data for immediate testing
