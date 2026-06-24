@@ -164,10 +164,45 @@ fn setup_demo_data(catalog: &mut Catalog, tables: &mut HashMap<String, Vec<Tuple
         tables,
     )?;
 
-    // 2. Create an orders table
+    // 2. Create a categories table
+    // Categories: id INT, category_name VARCHAR
+    execute_sql(
+        "CREATE TABLE categories (id INT, category_name VARCHAR);",
+        catalog,
+        tables,
+    )?;
+
+    execute_sql(
+        "INSERT INTO categories VALUES
+         (10, 'Electronics'),
+         (20, 'Books'),
+         (30, 'Clothing');",
+        catalog,
+        tables,
+    )?;
+
+    // 3. Create a products table
+    // Products: id INT, product_name VARCHAR, category_id INT
+    execute_sql(
+        "CREATE TABLE products (id INT, product_name VARCHAR, category_id INT);",
+        catalog,
+        tables,
+    )?;
+
+    execute_sql(
+        "INSERT INTO products VALUES 
+         (501, 'Laptop', 10), 
+         (502, 'Phone', 10), 
+         (503, 'Rust Programming Book', 20),
+         (504, 'T-Shirt', 30);",
+        catalog,
+        tables,
+    )?;
+
+    // 4. Create an orders table
     // Orders: id INT, user_id INT, amount FLOAT
     execute_sql(
-        "CREATE TABLE orders (id INT, user_id INT, amount FLOAT);",
+        "CREATE TABLE orders (id INT, user_id INT, product_id INT, amount FLOAT);",
         catalog,
         tables,
     )?;
@@ -175,16 +210,20 @@ fn setup_demo_data(catalog: &mut Catalog, tables: &mut HashMap<String, Vec<Tuple
     // Insert mock orders
     execute_sql(
         "INSERT INTO orders VALUES 
-         (101, 1, 150.0), 
-         (102, 2, 320.5), 
-         (103, 1, 45.0),
-         (104, 3, 20.0),
-         (105, 9, 999.0);", // user_id 9 is non-existent to test join filtration
+         (101, 1, 501, 1500.0), -- Alice bought Laptop (Electronics)
+         (102, 2, 503, 88.0),   -- Bob bought Rust Book (Books)
+         (103, 1, 504, 45.0),   -- Alice bought T-Shirt (Clothing)
+         (104, 3, 502, 999.0),  -- Charlie bought Phone (Electronics)
+         (105, 9, 501, 999.0);", // user_id 9 is non-existent to test join filtration
         catalog,
         tables,
     )?;
 
     println!("\x1b[32mDemo data loaded successfully.\x1b[0m");
-    println!("Tables: users (id, name, age, score), orders (id, user_id, amount)\n");
+    println!("Tables:");
+    println!("  - users (id, name, age, score)");
+    println!("  - categories (id, category_name)");
+    println!("  - products (id, product_name, category_id)");
+    println!("  - orders (id, user_id, product_id, amount)\n");
     Ok(())
 }

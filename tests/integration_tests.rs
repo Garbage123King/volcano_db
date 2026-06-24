@@ -54,7 +54,7 @@ fn execute_query(
 }
 
 fn setup_test_db() -> (Catalog, HashMap<String, Vec<Tuple>>) {
-    let mut catalog = Catalog::new();
+    let mut catalog = Catalog::newaaa();
     let mut tables = HashMap::new();
 
     // Create users table

@@ -84,6 +84,15 @@ SELECT age, COUNT(*), SUM(score)
 FROM users 
 GROUP BY age 
 ORDER BY age;
+
+-- Join, Gourp by
+SELECT u.name, u.age, COUNT(o.id) as order_count, SUM(o.amount) as total_spent
+FROM users u
+JOIN orders o ON u.id = o.user_id
+WHERE u.age >= 25 AND o.amount > 50
+GROUP BY u.name, u.age
+ORDER BY total_spent DESC, order_count ASC
+LIMIT 3;
 ```
 
 ---
