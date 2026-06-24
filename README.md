@@ -64,9 +64,11 @@ Run the executable to launch the interactive terminal shell:
 cargo run
 ```
 
-At startup, the CLI automatically loads two mock datasets:
+At startup, the CLI automatically loads four mock datasets:
 - **`users`**: columns `id` (INT), `name` (VARCHAR), `age` (INT), `score` (FLOAT)
-- **`orders`**: columns `id` (INT), `user_id` (INT), `amount` (FLOAT)
+- **`categories`**: columns `id` (INT), `category_name` (VARCHAR)
+- **`products`**: columns `id` (INT), `product_name` (VARCHAR), `category_id` (INT)
+- **`orders`**: columns `id` (INT), `user_id` (INT), `product_id` (INT), `amount` (FLOAT)
 
 ### Testing SQL Statements in the REPL
 
@@ -93,6 +95,18 @@ WHERE u.age >= 25 AND o.amount > 50
 GROUP BY u.name, u.age
 ORDER BY total_spent DESC, order_count ASC
 LIMIT 3;
+
+-- Three joins
+SELECT
+  u.name,
+  o.id AS order_id,
+  p.product_name,
+  c.category_name,
+  o.amount
+FROM orders o
+       JOIN users u ON o.user_id = u.id
+       JOIN products p ON o.product_id = p.id
+       JOIN categories c ON p.category_id = c.id;
 ```
 
 ---
