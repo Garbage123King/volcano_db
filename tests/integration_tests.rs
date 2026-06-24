@@ -192,3 +192,45 @@ fn test_limit_offset() {
     assert_eq!(result[0].values, vec![Value::Varchar("Bob".to_string())]);
     assert_eq!(result[1].values, vec![Value::Varchar("Charlie".to_string())]);
 }
+
+#[test]
+fn test_joins_with_aliases() {
+    let (mut catalog, mut tables) = setup_test_db();
+
+    // Query 1: SELECT u.name, o.amount FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.amount;
+    let result1 = execute_query(
+        "SELECT u.name, o.amount FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.amount;",
+        &mut catalog,
+        &mut tables,
+    ).unwrap();
+    assert_eq!(result1.len(), 4);
+    assert_eq!(result1[0].values, vec![Value::Varchar("Charlie".to_string()), Value::Float(20.0)]);
+
+    // Query 2: SELECT u.name, o.amount FROM orders o JOIN users u ON u.id = o.user_id ORDER BY o.amount;
+    let result2 = execute_query(
+        "SELECT u.name, o.amount FROM orders o JOIN users u ON u.id = o.user_id ORDER BY o.amount;",
+        &mut catalog,
+        &mut tables,
+    ).unwrap();
+    assert_eq!(result2.len(), 4);
+    assert_eq!(result2[0].values, vec![Value::Varchar("Charlie".to_string()), Value::Float(20.0)]);
+
+    // Query 3: SELECT u.name, o.amount FROM users u JOIN orders o ON u.id = o.user_id ORDER BY o.amount;
+    let result3 = execute_query(
+        "SELECT u.name, o.amount FROM users u JOIN orders o ON u.id = o.user_id ORDER BY o.amount;",
+        &mut catalog,
+        &mut tables,
+    ).unwrap();
+    assert_eq!(result3.len(), 4);
+    assert_eq!(result3[0].values, vec![Value::Varchar("Charlie".to_string()), Value::Float(20.0)]);
+
+    // Query 4: SELECT u.name, o.amount FROM users u JOIN orders o ON o.user_id = u.id ORDER BY o.amount;
+    let result4 = execute_query(
+        "SELECT u.name, o.amount FROM users u JOIN orders o ON o.user_id = u.id ORDER BY o.amount;",
+        &mut catalog,
+        &mut tables,
+    ).unwrap();
+    assert_eq!(result4.len(), 4);
+    assert_eq!(result4[0].values, vec![Value::Varchar("Charlie".to_string()), Value::Float(20.0)]);
+}
+

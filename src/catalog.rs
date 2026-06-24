@@ -26,16 +26,16 @@ impl Schema {
 
     /// Finds a column's index by name. Supports both fully-qualified and simple names.
     pub fn find_col_idx(&self, name: &str) -> Option<usize> {
-        // First try exact match
-        if let Some(pos) = self.columns.iter().position(|col| col.name == name) {
-            return Some(pos);
+        if name.contains('.') {
+            // Qualified name: must match exactly
+            self.columns.iter().position(|col| col.name == name)
+        } else {
+            // Unqualified name: match the base name of the columns
+            self.columns.iter().position(|col| {
+                let col_base = col.name.split('.').last().unwrap_or(&col.name);
+                col_base == name
+            })
         }
-        // Then try base name match (e.g. if name is "id" and we have "users.id")
-        let target_base = name.split('.').last().unwrap_or(name);
-        self.columns.iter().position(|col| {
-            let col_base = col.name.split('.').last().unwrap_or(&col.name);
-            col_base == target_base
-        })
     }
 }
 

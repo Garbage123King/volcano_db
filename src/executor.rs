@@ -637,7 +637,7 @@ impl Executor for HashAggExecutor {
 pub fn build_executor(plan: &LogicalPlan, catalog: &Catalog) -> Result<Box<dyn Executor>> {
     match plan {
         LogicalPlan::DummyScan => Ok(Box::new(DummyScanExecutor::new())),
-        LogicalPlan::Scan { table_name } => Ok(Box::new(SeqScanExecutor::new(table_name.clone()))),
+        LogicalPlan::Scan { table_name, .. } => Ok(Box::new(SeqScanExecutor::new(table_name.clone()))),
         LogicalPlan::Filter { child, predicate } => {
             let child_exec = build_executor(child, catalog)?;
             let child_schema = child.schema(catalog)?;

@@ -171,6 +171,7 @@ pub enum LogicalPlan {
     DummyScan,
     Scan {
         table_name: String,
+        alias: Option<String>,
     },
     Filter {
         child: Box<LogicalPlan>,
@@ -205,15 +206,16 @@ impl LogicalPlan {
     pub fn schema(&self, catalog: &Catalog) -> Result<Schema> {
         match self {
             LogicalPlan::DummyScan => Ok(Schema::new(vec![])),
-            LogicalPlan::Scan { table_name } => {
+            LogicalPlan::Scan { table_name, alias } => {
                 let s = catalog.get_schema(table_name)
                     .ok_or_else(|| anyhow!("Table not found in catalog: {}", table_name))?;
+                let qualifier = alias.as_ref().unwrap_or(table_name);
                 let qualified_cols = s.columns.iter().map(|col| {
                     Column {
                         name: if col.name.contains('.') {
                             col.name.clone()
                         } else {
-                            format!("{}.{}", table_name, col.name)
+                            format!("{}.{}", qualifier, col.name)
                         },
                         data_type: col.data_type.clone(),
                     }
@@ -575,9 +577,13 @@ fn bind_query(query: Query, catalog: &Catalog) -> Result<LogicalPlan> {
 
 fn bind_table_factor(tf: &TableFactor) -> Result<LogicalPlan> {
     match tf {
-        TableFactor::Table { name, .. } => Ok(LogicalPlan::Scan {
-            table_name: name.to_string(),
-        }),
+        TableFactor::Table { name, alias, .. } => {
+            let alias_str = alias.as_ref().map(|a| a.name.value.clone());
+            Ok(LogicalPlan::Scan {
+                table_name: name.to_string(),
+                alias: alias_str,
+            })
+        }
         other => Err(anyhow!("Unsupported FROM table factor: {:?}", other)),
     }
 }
