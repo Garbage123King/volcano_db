@@ -1,7 +1,8 @@
-use std::fmt;
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
+use std::fmt;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Value {
     Null,
     Int(i64),
@@ -32,14 +33,35 @@ impl fmt::Display for Value {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+/// 数据行: values 为业务列值, tx_id/scn 为事务可见性元数据
+#[derive(Debug, Clone)]
 pub struct Tuple {
     pub values: Vec<Value>,
+    /// 创建该行的事务 ID; None 表示系统/恢复数据 (对所有人可见)
+    pub tx_id: Option<u64>,
+    /// 该行对应的 SCN
+    pub scn: u64,
 }
 
 impl Tuple {
     pub fn new(values: Vec<Value>) -> Self {
-        Self { values }
+        Self {
+            values,
+            tx_id: None,
+            scn: 0,
+        }
+    }
+
+    pub fn new_with_meta(values: Vec<Value>, tx_id: Option<u64>, scn: u64) -> Self {
+        Self { values, tx_id, scn }
+    }
+}
+
+// PartialEq 只比较业务列值, 不比较事务元数据
+// (聚合/排序/DISTINCT 等逻辑不应受 tx_id/scn 影响)
+impl PartialEq for Tuple {
+    fn eq(&self, other: &Self) -> bool {
+        self.values == other.values
     }
 }
 
@@ -79,7 +101,7 @@ impl PartialOrd for Value {
             (Value::Varchar(a), Value::Varchar(b)) => a.partial_cmp(b),
             (Value::Bool(a), Value::Bool(b)) => a.partial_cmp(b),
             // 混合类型（如 Int 和 Varchar）无法比较大小
-            _ => None, 
+            _ => None,
         }
     }
 }

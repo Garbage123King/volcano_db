@@ -1,11 +1,16 @@
 use crate::catalog::{Catalog, Schema};
 use crate::storage::{Value, Tuple};
 use crate::planner::{Expr, LogicalPlan};
+use crate::tx::TransactionManager;
 use anyhow::{Result, anyhow};
 use std::collections::HashMap;
 
+/// 执行上下文: 注入事务可见性判断所需的事务管理器与会话信息
 pub struct ExecutionContext<'a> {
     pub tables: &'a HashMap<String, Vec<Tuple>>,
+    pub tx_mgr: &'a TransactionManager,
+    pub session_tx_id: Option<u64>,
+    pub cr_scn: u64,
 }
 
 pub trait Executor {
@@ -72,13 +77,15 @@ impl Executor for SeqScanExecutor {
 
     fn next(&mut self, ctx: &ExecutionContext) -> Result<Option<Tuple>> {
         if let Some(tuples) = ctx.tables.get(&self.table_name) {
-            if self.cursor < tuples.len() {
-                let t = tuples[self.cursor].clone();
+            while self.cursor < tuples.len() {
+                let t = &tuples[self.cursor];
                 self.cursor += 1;
-                Ok(Some(t))
-            } else {
-                Ok(None)
+                // CR SCN 可见性过滤: 跳过未提交事务的元组
+                if ctx.tx_mgr.is_visible(t.tx_id, ctx.session_tx_id, ctx.cr_scn) {
+                    return Ok(Some(t.clone()));
+                }
             }
+            Ok(None)
         } else {
             Err(anyhow!("Table not found in storage: {}", self.table_name))
         }
