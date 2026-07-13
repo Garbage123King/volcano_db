@@ -13,8 +13,9 @@ pub fn recover(
     catalog: &mut Catalog,
     tables: &mut HashMap<String, Vec<Tuple>>,
     tx_mgr: &mut TransactionManager,
+    redo_path: &str,
 ) -> Result<()> {
-    let path = "./redo.log";
+    let path = redo_path;
     if !std::path::Path::new(path).exists() {
         return Ok(());
     }

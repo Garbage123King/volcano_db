@@ -24,7 +24,7 @@ pub fn run(addr: &str, trace: bool) -> Result<()> {
 
     if has_redo {
         println!("[BOOT] 检测到 redo.log, 执行 Instance Recovery...");
-        recovery::recover(&mut db.catalog, &mut db.tables, &mut db.tx_mgr)?;
+        recovery::recover(&mut db.catalog, &mut db.tables, &mut db.tx_mgr, redo_path)?;
         // recovery 不恢复 catalog schema, 需加载 demo 数据补 schema (不覆盖已恢复的数据)
         setup_demo_data(&mut db)?;
     } else {

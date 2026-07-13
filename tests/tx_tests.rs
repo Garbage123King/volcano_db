@@ -119,7 +119,7 @@ fn test_crash_recovery_uncommitted() {
             tables: HashMap::new(),
             tx_mgr: TransactionManager::new(redo_path, false).unwrap(),
         };
-        volcano_db::recovery::recover(&mut db.catalog, &mut db.tables, &mut db.tx_mgr).unwrap();
+        volcano_db::recovery::recover(&mut db.catalog, &mut db.tables, &mut db.tx_mgr, redo_path).unwrap();
 
         // recovery 只重放了 redo.log 中的记录
         // Committed 的 INSERT 在 redo.log 中 (因为 COMMIT 触发了 LGWR)
