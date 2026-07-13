@@ -124,7 +124,7 @@ cargo build --release
 
 ### Running the Server
 
-Start the database server (default address `127.0.0.1:5432`):
+Start the database server (default address `127.0.0.1:3208`):
 ```bash
 cargo run -- server
 # or with a custom address:
